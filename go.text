@@ -1,0 +1,36 @@
+package main
+
+import (
+    "fmt"
+    "sync"
+)
+
+func main() {
+    var wg sync.WaitGroup
+    wg.Add(1) // Increment the WaitGroup counter
+
+    cnp := make(chan func(), 10)
+    for i := 0; i < 4; i++ {
+        go func() {
+            for f := range cnp {
+                f()
+            }
+        }()
+    }
+
+    cnp <- func() {
+        fmt.Println("HERE1")
+        wg.Done() // Decrement the counter when the function completes
+    }
+
+    fmt.Println("Hello")
+    wg.Wait() // Wait for all goroutines to finish
+}
+
+
+
+We created a channel to hold tasks.
+We started 4 workers to process tasks from the channel.
+We added a task to the channel to print "HERE1".
+We printed "Hello" immediately.
+We used a WaitGroup to ensure the program waits until the task is done before exiting.
